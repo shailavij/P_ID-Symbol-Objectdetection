@@ -4,7 +4,7 @@ A Piping and Instrumentation Diagram (P&ID) is a type of engineering diagram tha
 
 I have trained Object detection model by retraining final layer of SSD MobileNet v2 320x320 pretrained model.
 
-**P&ID diagram **
+**P&ID diagram**
 
 ![image](https://user-images.githubusercontent.com/49098763/125462171-8cec37ff-33ae-4041-8775-815b51075b66.png)
 
