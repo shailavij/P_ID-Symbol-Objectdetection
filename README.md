@@ -22,5 +22,19 @@ To detect dynamic symbol like Pump, motorised valve, control valve using Object 
 
 ![image](https://user-images.githubusercontent.com/49098763/125462480-d3b3a2e7-f121-403b-9235-d8700c34e349.png)
 
+**Tensorboard Visaulisation**
+![image](https://user-images.githubusercontent.com/49098763/125624978-6f0a0623-a599-4e54-b9d3-686e8c028fee.png)
+
+
+**Model Evaluation**
+![image](https://user-images.githubusercontent.com/49098763/125624844-269ec57d-ca29-4f58-b05d-e1779a36c033.png)
+
+![image](https://user-images.githubusercontent.com/49098763/125625041-c9760c2d-8604-4c9b-8389-5b56f54582a1.png)
+
+**Model Output**
+![image](https://user-images.githubusercontent.com/49098763/125625133-dd542178-2d86-4b0f-abc1-d67b4495fa4a.png)
+
+
+
 
 
