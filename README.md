@@ -40,4 +40,9 @@ To detect dynamic symbol like Pump, motorised valve, control valve using Object 
 
 
 
+**References**
+https://towardsdatascience.com/how-to-train-your-own-object-detector-with-tensorflows-object-detector-api-bec72ecfe1d9
+https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/training.html
+https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md
+
 
