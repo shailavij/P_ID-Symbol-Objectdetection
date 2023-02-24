@@ -1,4 +1,4 @@
-# Process-Symbol-detection
+## Process-Symbol-detection
 
 A Piping and Instrumentation Diagram (P&ID) is a type of engineering diagram that uses symbols, text, and lines to represent the components and ﬂow of an industrial process. Although used universally across industries such as manufacturing and oil & gas, P&IDs are usually trapped in image ﬁles with limited metadata, making their contents unsearchable and siloed from operational or enterprise systems. In this project I have used computer vision technique to detect symbols in this diagram.
 
@@ -8,12 +8,28 @@ I have trained Object detection model by retraining final layer of SSD MobileNet
 
 ![image](https://user-images.githubusercontent.com/49098763/125462171-8cec37ff-33ae-4041-8775-815b51075b66.png)
 
+<h3>Dynamic symbols</h3>
+To detect dynamic symbol like Pump, motorised valve, control valve using Object detection technique
+
+**Pump**
+
+![image](https://user-images.githubusercontent.com/49098763/125462394-583ab407-c6f5-4f6c-a4fa-e677bf970ce1.png)
+
+**Motorised Valve**
+
+![image](https://user-images.githubusercontent.com/49098763/125462458-5d03307b-416b-4bff-af4c-abcb3e2e5cdb.png)
+
+**Control Valve**
+
+![image](https://user-images.githubusercontent.com/49098763/125462480-d3b3a2e7-f121-403b-9235-d8700c34e349.png)
+
 Optional Additional Software:
 <ul>
 
 <li> <a href = "https://github.com/tzutalin/labelImg">labelImg</a> for bounding box annotation on training and test data</li>
 
 </ul>
+
 
 <h2>Training Preparation</h2>
 
@@ -48,40 +64,87 @@ A simple json file is also needed to tell the class names for the bounding boxes
 ```
 The id for the first object class in the map must start at 1 and not 0
 
-<h3>Dynamic symbols</h3>
-To detect dynamic symbol like Pump, motorised valve, control valve using Object detection technique
+<h3>Integration and Conversion of Images and Annotation Files into tf_record</h3>
 
-**Pump**
+The <a href="https://github.com/siddiqaa/psvcounter/blob/master/data/generate_tfrecord.py">generate_tfrecord.py</a> script was used to convert the images and the csv files into tf record expected for tensorflow. On Linux, the following commands were run from the data directory:<br>
+```shell
+python3.6 generate_tfrecord.py --csv_input=train_labels.csv  --output_path=train.record
 
-![image](https://user-images.githubusercontent.com/49098763/125462394-583ab407-c6f5-4f6c-a4fa-e677bf970ce1.png)
+python3.6 generate_tfrecord.py --csv_input=test_labels.csv  --output_path=test.record
+```
 
-**Motorised Valve**
+The files train.record and test.record are created from the two commands above.
 
-![image](https://user-images.githubusercontent.com/49098763/125462458-5d03307b-416b-4bff-af4c-abcb3e2e5cdb.png)
+<h3>Downloading the Pre-Trained Model</h3>
 
-**Control Valve**
+The next step is to download the pre-trained model from the <a href="https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md">Tensorflow detection model zoo</a>. In this case, I used the model ssd_inception_v2_coco_17_tpu8</a> model. The tarball should be moved into the models directory and exracted with the following command.<br>
+```shell
+tar -xvf ssd_inception_v2_coco_17_tpu8.tar.gz
+```
 
-![image](https://user-images.githubusercontent.com/49098763/125462480-d3b3a2e7-f121-403b-9235-d8700c34e349.png)
+Finally, the <a href="https://github.com/siddiqaa/psvcounter/blob/master/models/ssd_inception_v2_coco.config">training pipeline configuration file</a> is customized. There are four customizations needed in this file:
+<ol>
+<li>Update the number of clases on line 9</li>
+<li>Update the file location path to the train and test record files in lines 171 and 185 respectively</li>
+<li>Update the file location path to the class label map created earlier in line 173 and 187.</li>
+<li>Update the file location path to the pre-trained model in line 152.</li>
+</ol>
 
-**Tensorboard Visualisation**
+<h4>Using Other Models</h4>
+You can also download and trainother pre-trained models for final layer training as long as you update and use the matching config file from the <a href="https://github.com/tensorflow/models/tree/master/research/object_detection/samples/configs>example config files in the repo</a>.
+
+<h2>Training</h2>
+<h3>Downloading the Training Scripts</h3>
+Finally, everything is ready to train. Training is done using scripts from the <a href="https://github.com/tensorflow/models">tensorflow models repository</a> and specifically the scripts in the <a href="https://github.com/tensorflow/models/tree/master/research/object_detection">object detection folder</a>. The repo should be cloned to your local directory and the script <a href="https://github.com/tensorflow/models/blob/master/research/setup.py">setup.py</a> in the research folder executed using pip before starting the training. <br>
+
+```shell
+python3.6 pip -m setup.py install
+``` can 
+
+Installing the scripts as well as tensorflow on the Ubuntu machine that I used gave some unique installation errors and headaches that I had to research and resolve. You will likely face some errors and may have to do the same. If you get an error about "no module named 'depolyment'". Execute the following command from the models subirectory in the repo you downloaded above.
+
+```shell
+export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+```
+
+The script to train the model is trainer.py and it should be executed using python from the models directory.
+
+```shell
+python3.6 object_detection/train.py     --logtostderr     --pipeline_config_path=<INSERT YOUR PATH TO ssd_inception_v2_coco.config>    --train_dir=<INSERT YOUR PATH TO DATA FOLDER CONTAINING THE TRAINING DATA>
+```
+
+Once the training script starts, you will see the training time per step as well as the loss. The loss should decrease overall but could go up a little between adjacent training iterations. The configuration file is set to train for 500 steps but you can stop the training at anytime using the interrupt key combinations.
+
+
+<h3>Saving the Retrained Network Model</h3>
+When the training stops after reaching the training iteration limits or interrupted manually, the network model up to the last saved checkpoint can be obtained using the export_inference_graph.py script as follows:
+
+```shell
+python3.6 object_detection/export_inference_graph.py     --input_type image_tensor     --pipeline_config_path <INSERT YOUR PATH TO ssd_inception_v2_coco.config>     --trained_checkpoint_prefix <INSERT YOUR PATH TO THE SAVED MODEL CHECKPOINT DIRECTORY>     --output_directory output_inference_graph.pb
+```
+
+The command above will generat an output_inference_grap.pb file with the neural network model weights using the last available checkpoint saved data from training. The output_inference_grap.pb file is used in the actual object detection.
+
+
+<h2>Tensorboard Visualization</h2>
 
 ![image](https://user-images.githubusercontent.com/49098763/125624978-6f0a0623-a599-4e54-b9d3-686e8c028fee.png)
 
 
-**Model Evaluation**
+<h2>Model Evaluation</h2>
 
 ![image](https://user-images.githubusercontent.com/49098763/125624844-269ec57d-ca29-4f58-b05d-e1779a36c033.png)
 
 ![image](https://user-images.githubusercontent.com/49098763/125625041-c9760c2d-8604-4c9b-8389-5b56f54582a1.png)
 
-**Model Output**
+<h2>Model Output</h2>
 
 ![image](https://user-images.githubusercontent.com/49098763/125625133-dd542178-2d86-4b0f-abc1-d67b4495fa4a.png)
 
 
 
 
-**References**
+<h2> References</h2>
 https://towardsdatascience.com/how-to-train-your-own-object-detector-with-tensorflows-object-detector-api-bec72ecfe1d9
 https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/training.html
 https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md
