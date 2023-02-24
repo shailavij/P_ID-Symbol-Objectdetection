@@ -1,6 +1,8 @@
 ## Process-Symbol-detection
 
-A Piping and Instrumentation Diagram (P&ID) is a type of engineering diagram that uses symbols, text, and lines to represent the components and ﬂow of an industrial process. Although used universally across industries such as manufacturing and oil & gas, P&IDs are usually trapped in image ﬁles with limited metadata, making their contents unsearchable and siloed from operational or enterprise systems. In this project I have used computer vision technique to detect symbols in this diagram.
+A piping and instrument diagrams (P&IDs) are a key component of the process industry; they contain information about the plant, including the instruments, lines, valves, and control logic. However, the complexity of these diagrams makes it difficult to extract the information automatically. Although used universally across industries such as manufacturing and oil & gas, P&IDs are usually trapped in image ﬁles with limited metadata, making their contents unsearchable and siloed from operational or enterprise systems. In this project I have used computer vision object detection technique to detect symbols in this diagram.
+
+The demand for this project enable an automatic engineering diagram digitalization and improve productivity and gain a competitive edge for the company in the global market.
 
 I have trained Object detection model by retraining final layer of SSD MobileNet v2 320x320 pretrained model.
 
@@ -39,7 +41,7 @@ For my use case, the images to be processed were 11 x 17 size pages in a PDF. I 
 
 <h3>Image Segmentation into Smaller Sizes</h3>
 
-The Google SSD Inception V2 model is trained on images of size 299 by 299 so I had to segment the images into smaller sections that were 200 by 200. This size gave me a good ratio of segment image dimensions to target object bounding box dimension. In other words, the bounding box for the object to be detected was not too small or too large compared to the overall segment image dimensions. To handle situations where the target object to be detected might be split between two different segments, I overlapped the segments by 20 pixels on each side.
+The Google MobileNet V2 model is trained on images of size 299 by 299 so I had to segment the images into smaller sections that were 200 by 200. This size gave me a good ratio of segment image dimensions to target object bounding box dimension. In other words, the bounding box for the object to be detected was not too small or too large compared to the overall segment image dimensions. To handle situations where the target object to be detected might be split between two different segments, I overlapped the segments by 20 pixels on each side.
 
 <h3>Training Data Annotation</h3>
 
@@ -55,7 +57,7 @@ After the python script generated the csv file, I then used a spreadsheet to spl
 
 <h3>Creation of label map file</h3>
 
-A simple json file is also needed to tell the class names for the bounding boxes in the training data. So I created the <a href="https://github.com/siddiqaa/psvcounter/blob/master/data/label_map.pbtxt">label_map.pbtxt</a> file containing the following text.<br>
+A simple json file is also needed to tell the class names for the bounding boxes in the training data. So I created the label_map.pbtxt inside my input folder directory </a> file containing the following text.<br>
 ```
 {
   id: 1
@@ -77,12 +79,12 @@ The files train.record and test.record are created from the two commands above.
 
 <h3>Downloading the Pre-Trained Model</h3>
 
-The next step is to download the pre-trained model from the <a href="https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md">Tensorflow detection model zoo</a>. In this case, I used the model ssd_inception_v2_coco_17_tpu8</a> model. The tarball should be moved into the models directory and exracted with the following command.<br>
+The next step is to download the pre-trained model from the <a href="https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md">Tensorflow detection model zoo</a>. In this case, I used the model ssd_mobilenet_v2_coco_17_tpu8</a> model. The tarball should be moved into the models directory and exracted with the following command.<br>
 ```shell
-tar -xvf ssd_inception_v2_coco_17_tpu8.tar.gz
+tar -xvf ssd_mobilenet_v2_coco_17_tpu8.tar.gz
 ```
 
-Finally, the <a href="https://github.com/siddiqaa/psvcounter/blob/master/models/ssd_inception_v2_coco.config">training pipeline configuration file</a> is customized. There are four customizations needed in this file:
+Finally, the training pipeline configuration file</a> is customized. There are four customizations needed in this file:
 <ol>
 <li>Update the number of clases on line 9</li>
 <li>Update the file location path to the train and test record files in lines 171 and 185 respectively</li>
